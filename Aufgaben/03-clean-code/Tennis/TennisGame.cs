@@ -1,189 +1,95 @@
 using static System.Formats.Asn1.AsnWriter;
 
-namespace Tennis
-{
-    public class TennisGameManager
-    {
-        private int p1point;
-        private int p2point;
+namespace Tennis {
+    public class TennisGameManager {
+        private int pointsPlayerOne = 0;
+        private int pointsPlayerTwo = 0;
+        private string scorePlayerOne = "";
+        private string scorePlayerTwo = "";
+        private string namePlayerOne = "";
+        private string namePlayerTwo = "";
 
-        private string Five_teen = "Fifteen";
-
-        private string p1res = "";
-        private string p2res = "";
-        private string player1Name;
-        private string player2Name;
-
-        public TennisGameManager(string player1Name, 
-            string player2Name)
-        {
-            this.player1Name = player1Name;
-            p1point = 0;
-            this.player2Name = player2Name;
+        public TennisGameManager(string namePlayerOne, string namePlayerTwo) {
+            this.namePlayerOne = namePlayerOne;
+            this.namePlayerTwo = namePlayerTwo;
         }
 
-        public string Score_Getter()
-        {
-            var s = "";
-            // when both have same points and game smaller than three
-            if (p1point == p2point && p1point < 3){
-                if (p1point == 0)
-                    s = "Love";
-                if (p1point == 1)
-                {
-                    s = "Fifteen";}
-                if (p1point == 2)
-                    s = "Thirty";
-                // do we need this?
-                //if (p1point == 3)
-                //    s = "Fourty";
-                s += "-All";
-            }
-            if (p1point == p2point && p1point > 2)
-                s = "Deuce";
+        public string Score_Getter() {
+            string gameScore = "";
 
-            if (p1point > 0 && p2point == 0)
-            {
-                if (p1point == 1)
-                    p1res = Five_teen;
-                if (p1point == 2)
-                    p1res = "Thirty";
-                if (p1point == 3)
-                    p1res = "Forty";
+            scorePlayerOne = defineScore(pointsPlayerOne);
+            scorePlayerTwo = defineScore(pointsPlayerTwo);
 
-                p2res = "Love";
-                s = p1res + "-" + p2res;
-            }
-            if (p2point > 0 && p1point == 0)
-            {
-                var temp = p2point;
-                if (temp == 1)
-                    p2res = "Fifteen";
-                else
-                {
-                    // todo: 
-                }
-                if (temp == 2)
-                    p2res = "Thirty";
-                if (temp == 3)
-                    p2res = "Forty";
+            defineSpecialScoreForPlayerOne();
+            defineSpecialScoreForPlayerTwo();
 
-                p1res = "Love";
-                s = p1res + "-" + p2res;
-            }
-            if (p1point > p2point && p1point < 4){
-                if (p1point == 2)
-                    p1res = "Thirty";
-                if (p1point == 3)
-                    p1res = "Forty";
-                if (p2point == 1)
-                    p2res = "Fifteen";
-                if (p2point == 2)
-                    p2res = "Thirty";
-                s = p1res + "-" + p2res;}
+            gameScore = scorePlayerOne + "-" + scorePlayerTwo;
 
-
-
-            if (p2point > p1point && p2point < 4)
-            {
-                if (p2point ==   2)
-                    p2res = "Thirty";
-                if (p2point == 3)
-                    p2res = "Forty";
-                if (p1point == 1 )
-                    p1res = "Fifteen";
-                if (p1point == 2)
-                    p1res = "Thirty";
-                s = p1res + "-" + p2res;
+            if ((pointsPlayerOne == pointsPlayerTwo) && (pointsPlayerOne > 2)) {
+                gameScore = "Deuce";
             }
 
-            if (p1point > p2point && p2point >= 3)
-            {
-                s = "Advantage player1";
-            }
+            gameScore = getPlayerWithAdvantage(gameScore);
 
-            if (p2point > p1point && p1point >= 3)
-            {
-                s = generate_Player_2_Name();
-            }
-
-            if (p1point >= 4 && p2point >= 0 && (p1point - p2point) >= 2)
-            {
-                s = "Win for player1";
-            }
-            s = returnWinForPlayerOneIfWon(s, p1point, p2point);
-            return s;
+            gameScore = returnWinForPlayerIfWon(gameScore);
+            return gameScore;
         }
 
-        // This is the old implemenation: we may can it use later.
-        //private string GetResultOld(int tempScore, int m_score1, int m_score2)
-        //{
-        //    var score = "";
-        //    for (var i = 1; i < 3; i++)
-        //    {
-        //        if (i == 1) tempScore = m_score1;
-        //        else { score += "-"; tempScore = m_score2; }
-        //        switch (tempScore)
-        //        {
-        //            case 0:
-        //                score += "Love";
-        //                break;
-        //            case 1:
-        //                score += "Fifteen";
-        //                break;
-        //            case 2:
-        //                score += "Thirty";
-        //                break;
-        //            case 3:
-        //                score += "Forty";
-        //                break;
-        //        }
-        //    }
-        //    return "error";
-        //}
-
-        private static string generate_Player_2_Name()
-        {
-            return "Advantage player2";
-        }
-
-        public string returnWinForPlayerOneIfWon(string s, int q, int y)
-        {
-            if (y >= 4 && q >= 0 && (y - q) >= 2)
-            {
-                return "Win for player2";
-            }
-            return s; 
-        }
-
-        public void SetPlayer1Score(int number)
-        {
-            for (int i = 0; i < number; i++)
-            {
-                P1Score();
+        private void defineSpecialScoreForPlayerOne() {
+            if ((pointsPlayerTwo > 0) && (pointsPlayerOne == 0)) {
+                scorePlayerOne = "Love";
             }
         }
 
-        public void SetP2Score(int number)
-        {
-            for (var i = 0; i < number; i++)
-            {
-                SecondPlayerScore();
+        private void defineSpecialScoreForPlayerTwo() {
+            if ((pointsPlayerOne == pointsPlayerTwo) && (pointsPlayerOne < 3)) {
+                scorePlayerTwo = "All";
+            }
+            else if ((pointsPlayerOne > 0) && (pointsPlayerTwo == 0)) {
+                scorePlayerTwo = "Love";
             }
         }
 
-        private void P1Score() => p1point++;
-        private void SecondPlayerScore()
-        {
-            p2point++;
+        private string defineScore(int pointsPlayer) {
+            string gameScore = "";
+            if (pointsPlayer == 0) {
+                gameScore = "Love";
+            } else if (pointsPlayer == 1) {
+                gameScore = "Fifteen";
+            } else if (pointsPlayer == 2) {
+                gameScore = "Thirty";
+            } else if (pointsPlayer == 3) {
+                gameScore = "Forty";
+            }
+
+            return gameScore;
         }
 
-        public void WonPoint(string tennisPlayer)
-        {
-            if (tennisPlayer == "player1"){
-                P1Score();}
-            else
-                SecondPlayerScore();
+        private string getPlayerWithAdvantage(string gameScore) {
+            string playerWithAdvantage = gameScore;
+            if ((pointsPlayerOne > pointsPlayerTwo) && (pointsPlayerTwo >= 3)) {
+                playerWithAdvantage = "Advantage player1";
+            } else if ((pointsPlayerTwo > pointsPlayerOne) && (pointsPlayerOne >= 3)) {
+                playerWithAdvantage = "Advantage player2";
+            }
+            return playerWithAdvantage;
+        }
+
+        public string returnWinForPlayerIfWon(string gameScore) {
+            if (((pointsPlayerOne >= 4) && (pointsPlayerTwo >= 0)) && ((pointsPlayerOne - pointsPlayerTwo) >= 2)){
+                gameScore = "Win for player1";
+            } else if (((pointsPlayerTwo >= 4) && (pointsPlayerOne >= 0)) && ((pointsPlayerTwo - pointsPlayerOne) >= 2)) {
+                gameScore = "Win for player2";
+            }
+            return gameScore; 
+        }
+
+        public void wonPoint(string player) {
+            if (player == namePlayerOne) {
+                pointsPlayerOne++;
+            } else {
+                pointsPlayerTwo++;
+            }
         }
 
     }
